@@ -62,12 +62,12 @@ namespace Lidgren.Network
 		/// <summary>
 		/// If available, returns the bytes of the physical (MAC) address for the first usable network interface
 		/// </summary>
-		public static byte[] GetMacAddressBytes()
+		public static byte[] GetRandomBytes(int length=8)
 		{
-			var ni = GetNetworkInterface();
-			if (ni == null)
-				return null;
-			return ni.GetPhysicalAddress().GetAddressBytes();
+
+            var _random = new byte[length];
+            MWCRandom.Instance.NextBytes(_random);
+			return _random;
 		}
 
 		public static IPAddress GetBroadcastAddress()
