@@ -48,8 +48,7 @@ namespace Lidgren.Network
 				object value = fi.GetValue(ob);
 
 				// find the appropriate Write method
-				MethodInfo writeMethod;
-				if (s_writeMethods.TryGetValue(fi.FieldType, out writeMethod))
+				if (s_writeMethods.TryGetValue(fi.FieldType, out MethodInfo writeMethod))
 					writeMethod.Invoke(this, new object[] { value });
 				else
 					throw new NetException("Failed to find write method for type " + fi.FieldType);
@@ -79,16 +78,15 @@ namespace Lidgren.Network
 			foreach (PropertyInfo fi in fields)
 			{
 				MethodInfo getMethod = fi.GetGetMethod();
-				if (getMethod != null)
-				{
-					object value = getMethod.Invoke(ob, null);
+				if (getMethod == null)
+					continue;
 
-					// find the appropriate Write method
-					MethodInfo writeMethod;
-					if (s_writeMethods.TryGetValue(fi.PropertyType, out writeMethod))
-						writeMethod.Invoke(this, new object[] { value });
-				}
-			}
+                object value = getMethod.Invoke(ob, null);
+
+                // find the appropriate Write method
+                if (s_writeMethods.TryGetValue(fi.PropertyType, out MethodInfo writeMethod))
+                    writeMethod.Invoke(this, new object[] { value });
+            }
 		}
 	}
 }

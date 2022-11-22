@@ -54,15 +54,12 @@ namespace Lidgren.Network
 		/// </summary>
 		public void EnsureBufferSize(int numberOfBits)
 		{
-			int byteLen = ((numberOfBits + 7) >> 3);
+			int byteLen = (numberOfBits + 7) >> 3;
 			if (m_data == null)
 			{
 				m_data = new byte[byteLen + c_overAllocateAmount];
-				return;
-			}
-			if (m_data.Length < byteLen)
+			} else if (m_data.Length < byteLen)
 				Array.Resize<byte>(ref m_data, byteLen + c_overAllocateAmount);
-			return;
 		}
 
 		/// <summary>
@@ -74,11 +71,8 @@ namespace Lidgren.Network
 			if (m_data == null)
 			{
 				m_data = new byte[byteLen];
-				return;
-			}
-			if (m_data.Length < byteLen)
+			} else if (m_data.Length < byteLen)
 				Array.Resize<byte>(ref m_data, byteLen);
-			return;
 		}
 
 		/// <summary>
@@ -493,7 +487,7 @@ namespace Lidgren.Network
 			while (num1 >= 0x80)
 			{
 				this.Write((byte)(num1 | 0x80));
-				num1 = num1 >> 7;
+				num1 >>= 7;
 				retval++;
 			}
 			this.Write((byte)num1);
@@ -532,7 +526,7 @@ namespace Lidgren.Network
 			while (num1 >= 0x80)
 			{
 				this.Write((byte)(num1 | 0x80));
-				num1 = num1 >> 7;
+				num1 >>= 7;
 				retval++;
 			}
 			this.Write((byte)num1);
@@ -571,10 +565,10 @@ namespace Lidgren.Network
 		/// </summary>
 		public void WriteRangedSingle(float value, float min, float max, int numberOfBits)
 		{
-			NetException.Assert(((value >= min) && (value <= max)), " WriteRangedSingle() must be passed a float in the range MIN to MAX; val is " + value);
+			NetException.Assert((value >= min) && (value <= max), " WriteRangedSingle() must be passed a float in the range MIN to MAX; val is " + value);
 
 			float range = max - min;
-			float unit = ((value - min) / range);
+			float unit = (value - min) / range;
 			int maxVal = (1 << numberOfBits) - 1;
 			Write((UInt32)((float)maxVal * unit), numberOfBits);
 		}
@@ -596,22 +590,22 @@ namespace Lidgren.Network
 			return numBits;
 		}
 		
-	        /// <summary>
-	        /// Writes an integer with the least amount of bits need for the specified range
-	        /// Returns number of bits written
-	        /// </summary>
-	        public int WriteRangedInteger(long min, long max, long value)
-	        {
-	            NetException.Assert(value >= min && value <= max, "Value not within min/max range!");
-	
-	            ulong range = (ulong)(max - min);
-	            int numBits = NetUtility.BitsToHoldUInt64(range);
-	
-	            ulong rvalue = (ulong)(value - min);
-	            Write(rvalue, numBits);
-	
-	            return numBits;
-	        }
+		/// <summary>
+		/// Writes an integer with the least amount of bits need for the specified range
+		/// Returns number of bits written
+		/// </summary>
+		public int WriteRangedInteger(long min, long max, long value)
+		{
+		    NetException.Assert(value >= min && value <= max, "Value not within min/max range!");
+		
+		    ulong range = (ulong)(max - min);
+		    int numBits = NetUtility.BitsToHoldUInt64(range);
+		
+		    ulong rvalue = (ulong)(value - min);
+		    Write(rvalue, numBits);
+		
+		    return numBits;
+		}
 
 		/// <summary>
 		/// Write a string

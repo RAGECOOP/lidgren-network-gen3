@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Lidgren.Network
+﻿namespace Lidgren.Network
 {
 	internal static class NetFragmentationHelper
 	{
@@ -16,7 +14,7 @@ namespace Lidgren.Network
 			while (num1 >= 0x80)
 			{
 				destination[ptr++] = (byte)(num1 | 0x80);
-				num1 = num1 >> 7;
+				num1 >>= 7;
 			}
 			destination[ptr++] = (byte)num1;
 
@@ -25,7 +23,7 @@ namespace Lidgren.Network
 			while (num2 >= 0x80)
 			{
 				destination[ptr++] = (byte)(num2 | 0x80);
-				num2 = num2 >> 7;
+				num2 >>= 7;
 			}
 			destination[ptr++] = (byte)num2;
 
@@ -34,7 +32,7 @@ namespace Lidgren.Network
 			while (num3 >= 0x80)
 			{
 				destination[ptr++] = (byte)(num3 | 0x80);
-				num3 = num3 >> 7;
+				num3 >>= 7;
 			}
 			destination[ptr++] = (byte)num3;
 
@@ -43,7 +41,7 @@ namespace Lidgren.Network
 			while (num4 >= 0x80)
 			{
 				destination[ptr++] = (byte)(num4 | 0x80);
-				num4 = num4 >> 7;
+				num4 >>= 7;
 			}
 			destination[ptr++] = (byte)num4;
 
@@ -120,7 +118,7 @@ namespace Lidgren.Network
 			while (num1 >= 0x80)
 			{
 				len++;
-				num1 = num1 >> 7;
+				num1 >>= 7;
 			}
 
 			// write variable length fragment total bits
@@ -128,7 +126,7 @@ namespace Lidgren.Network
 			while (num2 >= 0x80)
 			{
 				len++;
-				num2 = num2 >> 7;
+				num2 >>= 7;
 			}
 
 			// write variable length fragment chunk byte size
@@ -136,7 +134,7 @@ namespace Lidgren.Network
 			while (num3 >= 0x80)
 			{
 				len++;
-				num3 = num3 >> 7;
+				num3 >>= 7;
 			}
 
 			// write variable length fragment chunk number
@@ -144,7 +142,7 @@ namespace Lidgren.Network
 			while (num4 >= 0x80)
 			{
 				len++;
-				num4 = num4 >> 7;
+				num4 >>= 7;
 			}
 
 			return len;
@@ -156,7 +154,7 @@ namespace Lidgren.Network
 			int est = GetFragmentationHeaderSize(group, totalBytes, tryChunkSize, totalBytes / tryChunkSize);
 			tryChunkSize = mtu - NetConstants.HeaderByteSize - est; // slightly less naive approximation
 
-			int headerSize = 0;
+			int headerSize;
 			do
 			{
 				tryChunkSize--; // keep reducing chunk size until it fits within MTU including header

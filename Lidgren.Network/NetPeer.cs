@@ -18,7 +18,7 @@ namespace Lidgren.Network
 
 		private int m_listenPort;
 		private object m_tag;
-		private object m_messageReceivedEventCreationLock = new object();
+		private readonly object m_messageReceivedEventCreationLock = new object();
 
 		internal readonly List<NetConnection> m_connections;
 		private readonly Dictionary<NetEndPoint, NetConnection> m_connectionLookup;
@@ -121,14 +121,7 @@ namespace Lidgren.Network
 			m_connections = new List<NetConnection>();
 			m_connectionLookup = new Dictionary<NetEndPoint, NetConnection>();
 			m_handshakes = new Dictionary<NetEndPoint, NetConnection>();
-            if (m_configuration.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                m_senderRemote = (EndPoint)new IPEndPoint(IPAddress.IPv6Any, 0);
-            }
-            else
-            {
-                m_senderRemote = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
-            }
+			m_senderRemote = (EndPoint)new IPEndPoint(m_configuration.LocalAddress.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
 			m_status = NetPeerStatus.NotRunning;
 			m_receivedFragmentGroups = new Dictionary<NetConnection, Dictionary<int, ReceivedFragmentGroup>>();
 		}
@@ -262,9 +255,8 @@ namespace Lidgren.Network
 			VerifyNetworkThread();
 			NetException.Assert(msg.m_isSent == false);
 
-			bool connReset;
 			int len = msg.Encode(m_sendBuffer, 0, 0);
-			SendPacket(len, recipient, 1, out connReset);
+			SendPacket(len, recipient, 1, out bool connReset);
 
 			// no reliability, no multiple recipients - we can just recycle this message immediately
 			msg.m_recyclingCount = 0;
@@ -364,8 +356,7 @@ namespace Lidgren.Network
 		{
 			// wrong thread - this miiiight crash with network thread... but what's a boy to do.
 			Array.Copy(arr, offset, m_sendBuffer, 0, length);
-			bool unused;
-			SendPacket(length, destination, 1, out unused);
+			SendPacket(length, destination, 1, out bool _);
 		}
 
 		/// <summary>

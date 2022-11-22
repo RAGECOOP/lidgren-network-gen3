@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading;
+﻿using System.Threading;
 
 #if !__NOIPENDPOINT__
 using NetEndPoint = System.Net.IPEndPoint;
@@ -84,7 +81,6 @@ namespace Lidgren.Network
 			Interlocked.Increment(ref punch.m_recyclingCount);
 			m_unsentUnconnectedMessages.Enqueue(new NetTuple<NetEndPoint, NetOutgoingMessage>(remoteExternal, punch));
 			LogDebug("NAT punch sent to " + remoteExternal);
-
 		}
 
 		/// <summary>

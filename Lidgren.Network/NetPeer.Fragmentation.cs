@@ -86,16 +86,12 @@ namespace Lidgren.Network
 			//
 			// read fragmentation header and combine fragments
 			//
-			int group;
-			int totalBits;
-			int chunkByteSize;
-			int chunkNumber;
 			int ptr = NetFragmentationHelper.ReadHeader(
 				im.m_data, 0,
-				out group,
-				out totalBits,
-				out chunkByteSize,
-				out chunkNumber
+				out int group,
+				out int totalBits,
+				out int chunkByteSize,
+				out int chunkNumber
 			);
 
 			NetException.Assert(im.LengthBytes > ptr);
@@ -113,24 +109,24 @@ namespace Lidgren.Network
 
 			if (chunkNumber >= totalNumChunks)
 			{
-				LogWarning("Index out of bounds for chunk " + chunkNumber + " (total chunks " + totalNumChunks + ")");
+				LogWarning($"Index out of bounds for chunk {chunkNumber} (total chunks {totalNumChunks})");
 				return;
 			}
 
-			Dictionary<int, ReceivedFragmentGroup> groups;
-			if (!m_receivedFragmentGroups.TryGetValue(im.SenderConnection, out groups))
+			if (!m_receivedFragmentGroups.TryGetValue(im.SenderConnection, out Dictionary<int, ReceivedFragmentGroup> groups))
 			{
 				groups = new Dictionary<int, ReceivedFragmentGroup>();
 				m_receivedFragmentGroups[im.SenderConnection] = groups;
 			}
 
-			ReceivedFragmentGroup info;
-			if (!groups.TryGetValue(group, out info))
+			if (!groups.TryGetValue(group, out ReceivedFragmentGroup info))
 			{
-				info = new ReceivedFragmentGroup();
-				info.Data = new byte[totalBytes];
-				info.ReceivedChunks = new NetBitVector(totalNumChunks);
-				groups[group] = info;
+                info = new ReceivedFragmentGroup
+                {
+                    Data = new byte[totalBytes],
+                    ReceivedChunks = new NetBitVector(totalNumChunks)
+                };
+                groups[group] = info;
 			}
 
 			info.ReceivedChunks[chunkNumber] = true;
@@ -143,27 +139,24 @@ namespace Lidgren.Network
 			int cnt = info.ReceivedChunks.Count();
 			//LogVerbose("Found fragment #" + chunkNumber + " in group " + group + " offset " + offset + " of total bits " + totalBits + " (total chunks done " + cnt + ")");
 
-			LogVerbose("Received fragment " + chunkNumber + " of " + totalNumChunks + " (" + cnt + " chunks received)");
+			LogVerbose($"Received fragment {chunkNumber} of {totalNumChunks} ({cnt} chunks received)");
 
-			if (info.ReceivedChunks.Count() == totalNumChunks)
+			if (info.ReceivedChunks.Count() != totalNumChunks)
 			{
-				// Done! Transform this incoming message
-				im.m_data = info.Data;
-				im.m_bitLength = (int)totalBits;
-				im.m_isFragment = false;
+                // data has been copied; recycle this incoming message
+                Recycle(im);
+				return;
+            }
 
-				LogVerbose("Fragment group #" + group + " fully received in " + totalNumChunks + " chunks (" + totalBits + " bits)");
-				groups.Remove(group);
+            // Done! Transform this incoming message
+            im.m_data = info.Data;
+            im.m_bitLength = (int)totalBits;
+            im.m_isFragment = false;
 
-				ReleaseMessage(im);
-			}
-			else
-			{
-				// data has been copied; recycle this incoming message
-				Recycle(im);
-			}
+            LogVerbose($"Fragment group #{group} fully received in {totalNumChunks} chunks ({totalBits} bits)");
+            groups.Remove(group);
 
-			return;
-		}
+            ReleaseMessage(im);
+        }
 	}
 }

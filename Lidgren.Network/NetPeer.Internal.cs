@@ -2,7 +2,6 @@
 using System.Net;
 using System.Threading;
 using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Net.Sockets;
 using System.Collections.Generic;
 
@@ -87,8 +86,7 @@ namespace Lidgren.Network
 
 			m_releasedIncomingMessages.Enqueue(msg);
 
-			if (m_messageReceivedEvent != null)
-				m_messageReceivedEvent.Set();
+			m_messageReceivedEvent?.Set();
 
 			if (m_receiveCallbacks != null)
 			{
@@ -301,8 +299,7 @@ namespace Lidgren.Network
 					LogDebug("Shutdown complete");
 
 					// wake up any threads waiting for server shutdown
-					if (m_messageReceivedEvent != null)
-						m_messageReceivedEvent.Set();
+					m_messageReceivedEvent?.Set();
 				}
 
 				m_lastSocketBind = float.MinValue;
@@ -401,21 +398,17 @@ namespace Lidgren.Network
 					if (om.m_recyclingCount <= 0)
 						Recycle(om);
 
-					bool connReset;
-					SendPacket(len, unsent.Item1, 1, out connReset);
+					SendPacket(len, unsent.Item1, 1, out bool connReset);
 				}
 			}
 
-            if (m_upnp != null)
-                m_upnp.CheckForDiscoveryTimeout();
+            m_upnp?.CheckForDiscoveryTimeout();
 
-			//
 			// read from socket
-			//
 			if (m_socket == null)
 				return;
-
-			if (!m_socket.Poll(1000, SelectMode.SelectRead)) // wait up to 1 ms for data to arrive
+            // wait up to 1 ms for data to arrive
+            if (!m_socket.Poll(1000, SelectMode.SelectRead))
 				return;
 
 			//if (m_socket == null || m_socket.Available < 1)
@@ -488,8 +481,7 @@ namespace Lidgren.Network
 				}
 			}
 
-			NetConnection sender = null;
-			m_connectionLookup.TryGetValue(ipsender, out sender);
+			m_connectionLookup.TryGetValue(ipsender, out NetConnection sender);
 
 			//
 			// parse packet into messages
@@ -761,7 +753,7 @@ namespace Lidgren.Network
 		{
 			Thread ct = Thread.CurrentThread;
 			if (Thread.CurrentThread != m_networkThread)
-				throw new NetException("Executing on wrong thread! Should be library system thread (is " + ct.Name + " mId " + ct.ManagedThreadId + ")");
+				throw new NetException($"Executing on wrong thread! Should be library system thread (is {ct.Name} mId {ct.ManagedThreadId})");
 		}
 
 		internal NetIncomingMessage SetupReadHelperMessage(int ptr, int payloadLength)

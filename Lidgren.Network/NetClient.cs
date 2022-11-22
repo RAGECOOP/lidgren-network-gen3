@@ -59,14 +59,8 @@ namespace Lidgren.Network
 		/// </summary>
 		public NetConnectionStatus ConnectionStatus
 		{
-			get
-			{
-				var conn = ServerConnection;
-				if (conn == null)
-					return NetConnectionStatus.Disconnected;
-				return conn.Status;
-			}
-		}
+			get => ServerConnection == null ? NetConnectionStatus.Disconnected : ServerConnection.Status;
+        }
 
 		/// <summary>
 		/// NetClient constructor
@@ -113,39 +107,38 @@ namespace Lidgren.Network
 		/// <param name="byeMessage">reason for disconnect</param>
 		public void Disconnect(string byeMessage)
 		{
-			NetConnection serverConnection = ServerConnection;
-			if (serverConnection == null)
+			if (ServerConnection != null)
 			{
-				lock (m_handshakes)
-				{
-					if (m_handshakes.Count > 0)
-					{
-						LogVerbose("Aborting connection attempt");
-						foreach(var hs in m_handshakes)
-							hs.Value.Disconnect(byeMessage);
-						return;
-					}
-				}
-
-				LogWarning("Disconnect requested when not connected!");
+                ServerConnection.Disconnect(byeMessage);
 				return;
-			}
-			serverConnection.Disconnect(byeMessage);
-		}
+            }
+
+            lock (m_handshakes)
+            {
+                if (m_handshakes.Count > 0)
+                {
+                    LogVerbose("Aborting connection attempt");
+                    foreach (var hs in m_handshakes)
+                        hs.Value.Disconnect(byeMessage);
+                    return;
+                }
+            }
+
+            LogWarning("Disconnect requested when not connected!");
+        }
 
 		/// <summary>
 		/// Sends message to server
 		/// </summary>
 		public NetSendResult SendMessage(NetOutgoingMessage msg, NetDeliveryMethod method)
 		{
-			NetConnection serverConnection = ServerConnection;
-			if (serverConnection == null)
+			if (ServerConnection == null)
 			{
 				LogWarning("Cannot send message, no server connection!");
 				return NetSendResult.FailedNotConnected;
 			}
 
-			return serverConnection.SendMessage(msg, method, 0);
+			return ServerConnection.SendMessage(msg, method, 0);
 		}
 
 		/// <summary>
@@ -153,24 +146,19 @@ namespace Lidgren.Network
 		/// </summary>
 		public NetSendResult SendMessage(NetOutgoingMessage msg, NetDeliveryMethod method, int sequenceChannel)
 		{
-			NetConnection serverConnection = ServerConnection;
-			if (serverConnection == null)
+			if (ServerConnection == null)
 			{
 				LogWarning("Cannot send message, no server connection!");
 				Recycle(msg);
 				return NetSendResult.FailedNotConnected;
 			}
 
-			return serverConnection.SendMessage(msg, method, sequenceChannel);
+			return ServerConnection.SendMessage(msg, method, sequenceChannel);
 		}
 
 		/// <summary>
 		/// Returns a string that represents this object
 		/// </summary>
-		public override string ToString()
-		{
-			return "[NetClient " + ServerConnection + "]";
-		}
-
-	}
+		public override string ToString() => $"[NetClient ${ServerConnection}]";
+    }
 }

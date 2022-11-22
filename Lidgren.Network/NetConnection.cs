@@ -579,9 +579,6 @@ namespace Lidgren.Network
 		/// <summary>
 		/// Returns a string that represents this object
 		/// </summary>
-		public override string ToString()
-		{
-			return "[NetConnection to " + m_remoteEndPoint + "]";
-		}
-	}
+		public override string ToString() => $"[NetConnection to ${m_remoteEndPoint}]";
+    }
 }

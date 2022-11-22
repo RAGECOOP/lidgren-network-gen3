@@ -101,11 +101,7 @@ namespace Lidgren.Network
 
 			// clear send queues
 			for (int i = 0; i < m_sendChannels.Length; i++)
-			{
-				NetSenderChannelBase channel = m_sendChannels[i];
-				if (channel != null)
-					channel.Reset();
-			}
+				m_sendChannels[i]?.Reset();
 
 			if (sendByeMessage)
 				SendDisconnect(reason, true);
@@ -134,7 +130,7 @@ namespace Lidgren.Network
 			m_peer.VerifyNetworkThread();
 
 			int preAllocate = 13 + m_peerConfiguration.AppIdentifier.Length;
-			preAllocate += (m_localHailMessage == null ? 0 : m_localHailMessage.LengthBytes);
+			preAllocate += m_localHailMessage == null ? 0 : m_localHailMessage.LengthBytes;
 
 			NetOutgoingMessage om = m_peer.CreateMessage(preAllocate);
 			om.m_messageType = NetMessageType.Connect;
@@ -283,14 +279,13 @@ namespace Lidgren.Network
 		{
 			m_peer.VerifyNetworkThread();
 
-			byte[] hail;
 			switch (tp)
 			{
 				case NetMessageType.Connect:
 					if (m_status == NetConnectionStatus.ReceivedInitiation)
 					{
 						// Whee! Server full has already been checked
-						bool ok = ValidateHandshakeData(ptr, payloadLength, out hail);
+						bool ok = ValidateHandshakeData(ptr, payloadLength, out byte[] hail);
 						if (ok)
 						{
 							if (hail != null)

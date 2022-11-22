@@ -1,6 +1,5 @@
 ﻿#if !WINDOWS_RUNTIME
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;

@@ -62,8 +62,7 @@ namespace Lidgren.Network
 			om.m_messageType = NetMessageType.Ping;
 
 			int len = om.Encode(m_peer.m_sendBuffer, 0, 0);
-			bool connectionReset;
-			m_peer.SendPacket(len, m_remoteEndPoint, 1, out connectionReset);
+			m_peer.SendPacket(len, m_remoteEndPoint, 1, out bool connectionReset);
 
 			m_statistics.PacketSent(len, 1);
 			m_peer.Recycle(om);
