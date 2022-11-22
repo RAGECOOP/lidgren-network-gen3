@@ -1,4 +1,4 @@
-﻿#if !WINDOWS_RUNTIME && !UNITY_STANDALONE_LINUX
+﻿#if !WINDOWS_RUNTIME
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
