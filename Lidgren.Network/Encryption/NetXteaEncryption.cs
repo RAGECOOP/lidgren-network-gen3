@@ -87,6 +87,9 @@ namespace Lidgren.Network
 		{
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public override void SetKey(byte[] data, int offset, int length)
 		{
 			var key = NetUtility.ComputeSHAHash(data, offset, length);

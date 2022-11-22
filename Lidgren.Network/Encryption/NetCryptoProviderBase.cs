@@ -4,10 +4,19 @@ using System.Security.Cryptography;
 
 namespace Lidgren.Network
 {
+	/// <summary>
+	/// 
+	/// </summary>
 	public abstract class NetCryptoProviderBase : NetEncryption
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		protected SymmetricAlgorithm m_algorithm;
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public NetCryptoProviderBase(NetPeer peer, SymmetricAlgorithm algo)
 			: base(peer)
 		{
@@ -16,6 +25,9 @@ namespace Lidgren.Network
 			m_algorithm.GenerateIV();
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public override void SetKey(byte[] data, int offset, int count)
 		{
 			int len = m_algorithm.Key.Length;
@@ -31,6 +43,9 @@ namespace Lidgren.Network
 			m_algorithm.IV = key;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public override bool Encrypt(NetOutgoingMessage msg)
 		{
 			int unEncLenBits = msg.LengthBits;
@@ -53,6 +68,9 @@ namespace Lidgren.Network
 			return true;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public override bool Decrypt(NetIncomingMessage msg)
 		{
 			int unEncLenBits = (int)msg.ReadUInt32();

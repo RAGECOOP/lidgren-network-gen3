@@ -78,6 +78,9 @@ namespace Lidgren.Network
 		}
 
 		private static IPAddress s_broadcastAddress;
+		/// <summary>
+		/// 
+		/// </summary>
 		public static IPAddress GetCachedBroadcastAddress()
 		{
 			if (s_broadcastAddress == null)
@@ -460,6 +463,9 @@ namespace Lidgren.Network
 			return bdr.ToString();
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static byte[] ComputeSHAHash(byte[] bytes)
 		{
 			// this is defined in the platform specific files

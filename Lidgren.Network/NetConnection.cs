@@ -559,6 +559,9 @@ namespace Lidgren.Network
 			return;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public bool CanSendImmediately(NetDeliveryMethod method, int sequenceChannel)
 		{
 			int channelSlot = (int)method - 1 + sequenceChannel;

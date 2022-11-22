@@ -20,6 +20,9 @@ namespace Lidgren.Network
 			m_key = key;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public override void SetKey(byte[] data, int offset, int count)
 		{
 			m_key = new byte[count];

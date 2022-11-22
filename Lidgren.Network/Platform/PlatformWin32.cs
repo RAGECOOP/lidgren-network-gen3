@@ -14,6 +14,9 @@ namespace Lidgren.Network
 		private static readonly long s_timeInitialized = Stopwatch.GetTimestamp();
 		private static readonly double s_dInvFreq = 1.0 / (double)Stopwatch.Frequency;
 		
+		/// <summary>
+		/// 
+		/// </summary>
 		[CLSCompliant(false)]
 		public static ulong GetPlatformSeed(int seedInc)
 		{
@@ -21,6 +24,9 @@ namespace Lidgren.Network
 			return seed ^ ((ulong)Environment.WorkingSet + (ulong)seedInc);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static double Now { get { return (double)(Stopwatch.GetTimestamp() - s_timeInitialized) * s_dInvFreq; } }
 
 		private static NetworkInterface GetNetworkInterface()
@@ -70,6 +76,9 @@ namespace Lidgren.Network
 			return _random;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static IPAddress GetBroadcastAddress()
 		{
 			var ni = GetNetworkInterface();
@@ -125,17 +134,26 @@ namespace Lidgren.Network
 			return null;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static void Sleep(int milliseconds)
 		{
 			System.Threading.Thread.Sleep(milliseconds);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public static IPAddress CreateAddressFromBytes(byte[] bytes)
 		{
 			return new IPAddress(bytes);
 		}
 		
 		private static readonly SHA256 s_sha = SHA256.Create();
+		/// <summary>
+		/// 
+		/// </summary>
 		public static byte[] ComputeSHAHash(byte[] bytes, int offset, int count)
 		{
 			return s_sha.ComputeHash(bytes, offset, count);

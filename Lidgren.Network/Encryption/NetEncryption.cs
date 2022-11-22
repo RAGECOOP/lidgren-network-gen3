@@ -24,12 +24,18 @@ namespace Lidgren.Network
 			m_peer = peer;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public void SetKey(string str)
 		{
 			var bytes = System.Text.Encoding.ASCII.GetBytes(str);
 			SetKey(bytes, 0, bytes.Length);
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public abstract void SetKey(byte[] data, int offset, int count);
 
 		/// <summary>
