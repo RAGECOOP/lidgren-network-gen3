@@ -1,4 +1,4 @@
-﻿#if !__CONSTRAINED__ && !WINDOWS_RUNTIME && !UNITY_STANDALONE_LINUX
+﻿#if !WINDOWS_RUNTIME && !UNITY_STANDALONE_LINUX
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
