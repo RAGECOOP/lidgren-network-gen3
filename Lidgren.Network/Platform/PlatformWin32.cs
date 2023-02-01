@@ -1,5 +1,4 @@
-﻿#if !__ANDROID__ && !__CONSTRAINED__ && !WINDOWS_RUNTIME && !UNITY_STANDALONE_LINUX
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -59,9 +58,6 @@ namespace Lidgren.Network
 			return best;
 		}
 
-		/// <summary>
-		/// If available, returns the bytes of the physical (MAC) address for the first usable network interface
-		/// </summary>
 		public static byte[] GetRandomBytes(int length=8)
 		{
 
@@ -153,4 +149,3 @@ namespace Lidgren.Network
 		public static double Now { get { return (double)(Stopwatch.GetTimestamp() - s_timeInitialized) * s_dInvFreq; } }
 	}
 }
-#endif
