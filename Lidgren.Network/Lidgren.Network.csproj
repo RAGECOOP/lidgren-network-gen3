@@ -57,7 +57,6 @@
     <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.4.336902">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="ZeroTier.Sockets" Version="1.4.3" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Encryption\NetCryptoProviderEncryption.cs" />

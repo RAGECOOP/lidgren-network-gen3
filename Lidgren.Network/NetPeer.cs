@@ -394,5 +394,16 @@ namespace Lidgren.Network
 			m_shutdownReason = bye;
 			m_status = NetPeerStatus.ShutdownRequested;
 		}
+
+		/// <summary>
+		/// Join the network thread, must be called after <see cref="Shutdown(string)"/>
+		/// </summary>
+		public void Join()
+		{
+			if (m_networkThread.IsAlive)
+			{
+				m_networkThread.Join();
+			}
+		}
 	}
 }
