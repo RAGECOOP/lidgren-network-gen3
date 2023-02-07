@@ -4,7 +4,8 @@ using System.Security.Cryptography;
 
 namespace Lidgren.Network
 {
-	public class NetTripleDESEncryption : NetCryptoProviderBase
+    [Obsolete("Broken")]
+    public class NetTripleDESEncryption : NetCryptoProviderBase
 	{
 		public NetTripleDESEncryption(NetPeer peer)
 			: base(peer, new TripleDESCryptoServiceProvider())

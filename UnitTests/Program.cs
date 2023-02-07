@@ -10,8 +10,6 @@ namespace UnitTests
 	{
 		static void Main(string[] args)
 		{
-			ZerotierTest.NodeTest();
-			return;
 			NetPeerConfiguration config = new NetPeerConfiguration("unittests");
 			config.EnableUPnP = true;
 			NetPeer peer = new NetPeer(config);

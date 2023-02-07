@@ -4,7 +4,8 @@ using System.Security.Cryptography;
 
 namespace Lidgren.Network
 {
-	public class NetRC2Encryption : NetCryptoProviderBase
+    [Obsolete("Broken")]
+    public class NetRC2Encryption : NetCryptoProviderBase
 	{
 		public NetRC2Encryption(NetPeer peer)
 			: base(peer, new RC2CryptoServiceProvider())
