@@ -1,8 +1,5 @@
-﻿using System;
-using System.Text;
-
-using Lidgren.Network;
-using System.Security;
+﻿using Lidgren.Network;
+using System;
 using System.Collections.Generic;
 
 namespace UnitTests
@@ -19,7 +16,7 @@ namespace UnitTests
                 new NetXorEncryption(peer, "TopSecret"),
                 new NetXtea(peer, "TopSecret")
             };
-            
+
             // These are apparently broken for some reason
             // algos.Add(new NetAESEncryption(peer, "TopSecret"));
             // algos.Add(new NetRC2Encryption(peer, "TopSecret"));

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using static Lidgren.Network.NetException;
-using Lidgren.Network;
+﻿using Lidgren.Network;
+using System;
+using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Linq;
+using static Lidgren.Network.NetException;
 
 namespace UnitTests
 {

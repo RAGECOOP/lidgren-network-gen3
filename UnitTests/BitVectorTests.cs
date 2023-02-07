@@ -1,39 +1,39 @@
-﻿using System;
-using Lidgren.Network;
+﻿using Lidgren.Network;
+using System;
 
 namespace UnitTests
 {
-	public static class BitVectorTests
-	{
-		public static void Run()
-		{
-			NetBitVector v = new NetBitVector(256);
-			for (int i = 0; i < 256; i++)
-			{
-				v.Clear();
-				if (i > 42 && i < 65)
-					v = new NetBitVector(256);
+    public static class BitVectorTests
+    {
+        public static void Run()
+        {
+            NetBitVector v = new NetBitVector(256);
+            for (int i = 0; i < 256; i++)
+            {
+                v.Clear();
+                if (i > 42 && i < 65)
+                    v = new NetBitVector(256);
 
-				if (!v.IsEmpty())
-					throw new NetException("bit vector fail 1");
+                if (!v.IsEmpty())
+                    throw new NetException("bit vector fail 1");
 
-				v.Set(i, true);
+                v.Set(i, true);
 
-				if (v.Get(i) == false)
-					throw new NetException("bit vector fail 2");
+                if (v.Get(i) == false)
+                    throw new NetException("bit vector fail 2");
 
-				if (v.IsEmpty())
-					throw new NetException("bit vector fail 3");
+                if (v.IsEmpty())
+                    throw new NetException("bit vector fail 3");
 
-				if (i != 79 && v.Get(79) == true)
-					throw new NetException("bit vector fail 4");
+                if (i != 79 && v.Get(79) == true)
+                    throw new NetException("bit vector fail 4");
 
-				int f = v.GetFirstSetIndex();
-				if (f != i)
-					throw new NetException("bit vector fail 4");
-			}
+                int f = v.GetFirstSetIndex();
+                if (f != i)
+                    throw new NetException("bit vector fail 4");
+            }
 
-			/*
+            /*
 			v = new NetBitVector(9);
 			v.Clear();
 			v.Set(3, true);
@@ -64,7 +64,7 @@ namespace UnitTests
 				throw new NetException("NetBitVector.RotateDown failed 5");
 			*/
 
-			Console.WriteLine("NetBitVector tests OK");
-		}
-	}
+            Console.WriteLine("NetBitVector tests OK");
+        }
+    }
 }
