@@ -25,7 +25,7 @@ namespace Lidgren.Network
             Assert(m_bitLength - m_readPosition >= 1, c_readOverflowError);
             byte retval = NetBitWriter.ReadByte(m_data, 1, m_readPosition);
             m_readPosition += 1;
-            return (retval > 0 ? true : false);
+            return retval > 0;
         }
 
         /// <summary>
@@ -44,6 +44,17 @@ namespace Lidgren.Network
         /// Reads a POCO struct
         /// </summary>
         public unsafe void ReadStruct<T>(out T outVal) where T : unmanaged
+        {
+            Assert((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
+            NetBitWriter.ReadStruct(out outVal, m_data, m_readPosition);
+            m_readPosition += sizeof(T) * 8;
+        }
+
+
+        /// <summary>
+        /// Reads a POCO struct
+        /// </summary>
+        public unsafe void ReadStructVal<T>(out T outVal) where T : unmanaged
         {
             Assert((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
             NetBitWriter.ReadStruct(out outVal, m_data, m_readPosition);

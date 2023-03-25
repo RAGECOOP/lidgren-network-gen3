@@ -96,7 +96,7 @@ namespace Lidgren.Network
         /// <param name="value"></param>
         public unsafe void Write<T>(ref T value) where T : unmanaged
         {
-            EnsureBufferSize(m_bitLength + sizeof(T));
+            EnsureBufferSize(m_bitLength + sizeof(T) * 8);
             NetBitWriter.WriteStruct(ref value, m_data, m_bitLength);
             m_bitLength += sizeof(T) * 8;
         }
