@@ -35,7 +35,7 @@ namespace Lidgren.Network
         /// </summary>
         public static byte ReadByte(byte[] fromBuffer, int numberOfBits, int readBitOffset)
         {
-            NetException.Assert(((numberOfBits > 0) && (numberOfBits < 9)), "Read() can only read between 1 and 8 bits");
+            Assert(((numberOfBits > 0) && (numberOfBits < 9)), "Read() can only read between 1 and 8 bits");
 
             int bytePtr = readBitOffset >> 3;
             int startReadAtIndex = readBitOffset - (bytePtr * 8); // (readBitOffset % 8);
@@ -68,33 +68,87 @@ namespace Lidgren.Network
         /// </summary>
         public static void ReadBytes(byte[] fromBuffer, int numberOfBytes, int readBitOffset, byte[] destination, int destinationByteOffset)
         {
+#if UNSAFE
+            unsafe
+            {
+                var readByteOffset = readBitOffset >> 3;
+                readBitOffset -= readByteOffset * 8;
+                AssertAlways(fromBuffer.Length >= (readBitOffset == 0 ? readByteOffset : (readByteOffset + 1)));
+                fixed (byte* pFrom = &fromBuffer[readByteOffset], pDest = destination)
+                {
+                    ReadBytes(pFrom, numberOfBytes, readBitOffset, pDest);
+                }
+            }
+#else
             int readPtr = readBitOffset >> 3;
-            int startReadAtIndex = readBitOffset - (readPtr * 8); // (readBitOffset % 8);
+            int segReadOffset = readBitOffset - (readPtr * 8); // (readBitOffset % 8);
 
-            if (startReadAtIndex == 0)
+            if (segReadOffset == 0)
             {
                 Buffer.BlockCopy(fromBuffer, readPtr, destination, destinationByteOffset, numberOfBytes);
                 return;
             }
 
-            int secondPartLen = 8 - startReadAtIndex;
-            int secondMask = 255 >> secondPartLen;
+            int firstPartLen = 8 - segReadOffset;
 
             for (int i = 0; i < numberOfBytes; i++)
             {
-                // mask away unused bits lower than (right of) relevant bits in byte
-                int b = fromBuffer[readPtr] >> startReadAtIndex;
+                destination[destinationByteOffset++] = (byte)
+                    (fromBuffer[readPtr] >> segReadOffset // Shift out lower bits in first byte
+                    | (fromBuffer[++readPtr] << firstPartLen)); // Shift out higher bits in second byte
+            }
+#endif
+        }
 
-                readPtr++;
-
-                // mask away unused bits higher than (left of) relevant bits in second byte
-                int second = fromBuffer[readPtr] & secondMask;
-
-                destination[destinationByteOffset++] = (byte)(b | (second << secondPartLen));
+#if UNSAFE
+        /// <summary>
+        /// Read an sequence of bytes from the buffer
+        /// </summary>
+        [CLSCompliant(false)]
+        public static unsafe void ReadBytes(byte* fromBuffer, int cbToCopy, int readBitOffset, byte* destination)
+        {
+            Assert(0 <= readBitOffset && readBitOffset < 8);
+            if (readBitOffset == 0)
+            {
+                Buffer.MemoryCopy(fromBuffer, destination, cbToCopy, cbToCopy);
+                return;
             }
 
-            return;
+            int firstPartLen = 8 - readBitOffset;
+            for (int i = 0; i < cbToCopy; i++)
+            {
+                destination[i] = (byte)
+                    (fromBuffer[i] >> readBitOffset // Shift out lower bits in first byte
+                    | (fromBuffer[i + 1] << firstPartLen)); // Shift out higher bits in second byte
+            }
         }
+
+        /// <summary>
+        /// Read a POCO struct from buffer
+        /// </summary>
+        [CLSCompliant(false)]
+        public static unsafe void ReadStruct<T>(out T value, byte* fromBuffer, int readBitOffset) where T : unmanaged
+        {
+            if (readBitOffset == 0)
+                value = *(T*)fromBuffer;
+            else
+                fixed (T* pDest = &value)
+                {
+                    ReadBytes(fromBuffer, sizeof(T), readBitOffset, (byte*)pDest);
+                }
+        }
+
+        public static unsafe void ReadStruct<T>(out T value, byte[] fromBuffer, int readBitOffset) where T : unmanaged
+        {
+            fixed (byte* pSrc = fromBuffer)
+            {
+                var readByteOffset = readBitOffset >> 3;
+                readBitOffset -= readByteOffset * 8;
+                AssertAlways(fromBuffer.Length >= (readBitOffset == 0 ? readByteOffset : (readByteOffset + 1)));
+                ReadStruct(out value, pSrc + readByteOffset, readBitOffset);
+            }
+        }
+#endif
 
         /// <summary>
         /// Write 0-8 bits of data to buffer
@@ -104,7 +158,7 @@ namespace Lidgren.Network
             if (numberOfBits == 0)
                 return;
 
-            NetException.Assert(((numberOfBits >= 0) && (numberOfBits <= 8)), "Must write between 0 and 8 bits!");
+            Assert(((numberOfBits >= 0) && (numberOfBits <= 8)), "Must write between 0 and 8 bits!");
 
             // Mask out all the bits we dont want
             source = (byte)(source & (0xFF >> (8 - numberOfBits)));
@@ -149,48 +203,55 @@ namespace Lidgren.Network
             );
         }
 
-        /// <summary>
-        /// Write several whole bytes
-        /// </summary>
 
-#if UNSAFE
-        public static unsafe void WriteBytes(byte[] source, int sourceByteOffset, int numberOfBytes, byte[] destination, int destBitOffset)
-        {
-            fixed (byte* pSource = &source[sourceByteOffset], pDest = &destination[destBitOffset >> 3])
-            {
-                WriteBytes(pSource, numberOfBytes, pDest, destBitOffset % 8);
-            }
-#else
+        /// <summary>
+        /// Write given bytes and perform bit shifting as needed
+        /// </summary>
         public static void WriteBytes(byte[] source, int sourceByteOffset, int numberOfBytes, byte[] destination, int destBitOffset)
         {
+#if UNSAFE
+            unsafe
+            {
+                var destByteOffset = destBitOffset >> 3;
+                destBitOffset -= destByteOffset * 8;
+                AssertAlways(source.Length >= sourceByteOffset + numberOfBytes);
+                AssertAlways(destination.Length >= destByteOffset + (destBitOffset == 0 ? numberOfBytes : (numberOfBytes + 1)));
+                fixed (byte* pSource = &source[sourceByteOffset], pDest = &destination[destByteOffset])
+                {
+                    WriteBytes(pSource, numberOfBytes, pDest, destBitOffset);
+                }
+            }
+#else
             int dstBytePtr = destBitOffset >> 3;
-            int firstPartLen = (destBitOffset % 8);
+            int segWriteOffset = (destBitOffset % 8);
 
-            if (firstPartLen == 0)
+            if (segWriteOffset == 0)
             {
                 Buffer.BlockCopy(source, sourceByteOffset, destination, dstBytePtr, numberOfBytes);
                 return;
             }
 
-            int lastPartLen = 8 - firstPartLen;
+            int firstPartLen = 8 - segWriteOffset;
 
             for (int i = 0; i < numberOfBytes; i++)
             {
                 byte src = source[sourceByteOffset + i];
 
                 // write last part of this byte
-                destination[dstBytePtr] &= (byte)(byte.MaxValue >> lastPartLen); // clear before writing
-                destination[dstBytePtr] |= (byte)(src << firstPartLen); // write first half
+                destination[dstBytePtr] &= (byte)(byte.MaxValue >> firstPartLen); // clear before writing
+                destination[dstBytePtr] |= (byte)(src << segWriteOffset); // write first half
 
                 dstBytePtr++;
 
                 // write first part of next byte
-                destination[dstBytePtr] &= (byte)(byte.MaxValue << firstPartLen); // clear before writing
-                destination[dstBytePtr] |= (byte)(src >> lastPartLen); // write second half
+                destination[dstBytePtr] &= (byte)(byte.MaxValue << segWriteOffset); // clear before writing
+                destination[dstBytePtr] |= (byte)(src >> firstPartLen); // write second half
             }
-            
+
 #endif
         }
+
+#if UNSAFE
 
         /// <summary>
         /// Write given bytes and perform bit shifting as needed
@@ -198,34 +259,64 @@ namespace Lidgren.Network
         [CLSCompliant(false)]
         public static unsafe void WriteBytes(byte* source, int cbSource, byte* destination, int destBitOffset)
         {
-#if DEBUG
-            if (destBitOffset >= 8)
-                throw new DataMisalignedException($"{nameof(destBitOffset)} should be less than 8");
-#endif
-            int firstPartLen = destBitOffset;
+            Assert(0 <= destBitOffset && destBitOffset < 8);
             if (destBitOffset == 0)
             {
                 Buffer.MemoryCopy(source, destination, cbSource, cbSource);
                 return;
             }
 
-            int lastPartLen = 8 - firstPartLen;
+            int firstPartLen = 8 - destBitOffset;
 
             for (int i = 0; i < cbSource;)
             {
                 byte src = source[i];
 
                 // write last part of this byte
-                destination[i] &= (byte)(byte.MaxValue >> lastPartLen); // clear before writing
-                destination[i] |= (byte)(src << firstPartLen); // write first half
+                destination[i] &= (byte)(byte.MaxValue >> firstPartLen); // clear before writing
+                destination[i] |= (byte)(src << destBitOffset); // write first half
                 i++;
                 // write first part of next byte
-                destination[i] &= (byte)(byte.MaxValue << firstPartLen); // clear before writing
-                destination[i] |= (byte)(src >> lastPartLen); // write second half
+                destination[i] &= (byte)(byte.MaxValue << destBitOffset); // clear before writing
+                destination[i] |= (byte)(src >> firstPartLen); // write second half
             }
 
             return;
         }
+
+        /// <summary>
+        /// Write an unmanaged POCO struct into the buffer
+        /// </summary>
+        [CLSCompliant(false)]
+        public static unsafe void WriteStruct<T>(ref T value, byte* dest, int destBitOffset) where T : unmanaged
+        {
+            fixed (T* pVal = &value)
+            {
+                // Byte-aligned, just copy the whole struct
+                if (destBitOffset == 0)
+                    *(T*)dest = value;
+                else
+                    WriteBytes((byte*)pVal, sizeof(T), dest, destBitOffset);
+            }
+        }
+
+
+        /// <summary>
+        /// Write an unmanaged POCO struct into specified buffer
+        /// </summary>
+        [CLSCompliant(false)]
+        public static unsafe void WriteStruct<T>(ref T value, byte[] dest, int destBitOffset) where T : unmanaged
+        {
+            var destByteOffset = destBitOffset >> 3;
+            destBitOffset -= destByteOffset * 8;
+            AssertAlways(dest.Length >= (destBitOffset == 0 ? destByteOffset : (destByteOffset + 1)) + sizeof(T));
+            fixed (byte* pDest = &dest[destByteOffset])
+            {
+                WriteStruct(ref value, pDest, destBitOffset);
+            }
+        }
+#endif
+
 
         /// <summary>
         /// Reads an unsigned 16 bit integer
@@ -280,7 +371,7 @@ namespace Lidgren.Network
 #if UNSAFE
         public static unsafe uint ReadUInt32(byte[] fromBuffer, int numberOfBits, int readBitOffset)
         {
-            NetException.Assert(((numberOfBits > 0) && (numberOfBits <= 32)), "ReadUInt32() can only read between 1 and 32 bits");
+            Assert(((numberOfBits > 0) && (numberOfBits <= 32)), "ReadUInt32() can only read between 1 and 32 bits");
 
             if (numberOfBits == 32 && ((readBitOffset % 8) == 0))
             {
@@ -293,7 +384,7 @@ namespace Lidgren.Network
 
         public static uint ReadUInt32(byte[] fromBuffer, int numberOfBits, int readBitOffset)
         {
-            NetException.Assert(((numberOfBits > 0) && (numberOfBits <= 32)), "ReadUInt32() can only read between 1 and 32 bits");
+            Assert(((numberOfBits > 0) && (numberOfBits <= 32)), "ReadUInt32() can only read between 1 and 32 bits");
 #endif
             uint returnValue;
             if (numberOfBits <= 8)
@@ -351,7 +442,7 @@ namespace Lidgren.Network
             if (numberOfBits == 0)
                 return;
 
-            NetException.Assert((numberOfBits >= 0 && numberOfBits <= 16), "numberOfBits must be between 0 and 16");
+            Assert((numberOfBits >= 0 && numberOfBits <= 16), "numberOfBits must be between 0 and 16");
 #if BIGENDIAN
 			// reorder bytes
 			uint intSource = source;
@@ -543,7 +634,7 @@ namespace Lidgren.Network
             int num2 = 0;
             while (true)
             {
-                NetException.Assert(num2 != 0x23, "Bad 7-bit encoded integer");
+                Assert(num2 != 0x23, "Bad 7-bit encoded integer");
 
                 byte num3 = buffer[offset++];
                 num1 |= (num3 & 0x7f) << (num2 & 0x1f);

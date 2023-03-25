@@ -59,8 +59,8 @@ namespace Lidgren.Network
                 chunk.m_fragmentChunkByteSize = bytesPerChunk;
                 chunk.m_fragmentChunkNumber = i;
 
-                NetException.Assert(chunk.m_bitLength != 0);
-                NetException.Assert(chunk.GetEncodedSize() < mtu);
+                Assert(chunk.m_bitLength != 0);
+                Assert(chunk.GetEncodedSize() < mtu);
 
                 Interlocked.Add(ref chunk.m_recyclingCount, recipients.Count);
 
@@ -98,18 +98,18 @@ namespace Lidgren.Network
                 out chunkNumber
             );
 
-            NetException.Assert(im.LengthBytes > ptr);
+            Assert(im.LengthBytes > ptr);
 
-            NetException.Assert(group > 0);
-            NetException.Assert(totalBits > 0);
-            NetException.Assert(chunkByteSize > 0);
+            Assert(group > 0);
+            Assert(totalBits > 0);
+            Assert(chunkByteSize > 0);
 
             int totalBytes = NetUtility.BytesToHoldBits((int)totalBits);
             int totalNumChunks = totalBytes / chunkByteSize;
             if (totalNumChunks * chunkByteSize < totalBytes)
                 totalNumChunks++;
 
-            NetException.Assert(chunkNumber < totalNumChunks);
+            Assert(chunkNumber < totalNumChunks);
 
             if (chunkNumber >= totalNumChunks)
             {

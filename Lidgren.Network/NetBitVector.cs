@@ -109,7 +109,7 @@ namespace Lidgren.Network
         /// </summary>
         public bool Get(int bitIndex)
         {
-            NetException.Assert(bitIndex >= 0 && bitIndex < m_capacity);
+            Assert(bitIndex >= 0 && bitIndex < m_capacity);
 
             return (m_data[bitIndex / 32] & (1 << (bitIndex % 32))) != 0;
         }
@@ -119,7 +119,7 @@ namespace Lidgren.Network
         /// </summary>
         public void Set(int bitIndex, bool value)
         {
-            NetException.Assert(bitIndex >= 0 && bitIndex < m_capacity);
+            Assert(bitIndex >= 0 && bitIndex < m_capacity);
 
             int idx = bitIndex / 32;
             if (value)
@@ -153,7 +153,7 @@ namespace Lidgren.Network
         {
             Array.Clear(m_data, 0, m_data.Length);
             m_numBitsSet = 0;
-            NetException.Assert(this.IsEmpty());
+            Assert(this.IsEmpty());
         }
 
         /// <summary>

@@ -150,7 +150,7 @@ namespace Lidgren.Network
         {
             m_peer.VerifyNetworkThread();
 
-            NetException.Assert(m_status != NetConnectionStatus.InitiatedConnect && m_status != NetConnectionStatus.RespondedConnect);
+            Assert(m_status != NetConnectionStatus.InitiatedConnect && m_status != NetConnectionStatus.RespondedConnect);
 
             if ((frameCounter % m_infrequentEventsSkipFrames) == 0)
             {
@@ -201,7 +201,7 @@ namespace Lidgren.Network
                     if (acks > m_queuedOutgoingAcks.Count)
                         acks = m_queuedOutgoingAcks.Count;
 
-                    NetException.Assert(acks > 0);
+                    Assert(acks > 0);
 
                     m_sendBufferNumMessages++;
 
@@ -229,7 +229,7 @@ namespace Lidgren.Network
                     if (m_queuedOutgoingAcks.Count > 0)
                     {
                         // send packet and go for another round of acks
-                        NetException.Assert(m_sendBufferWritePtr > 0 && m_sendBufferNumMessages > 0);
+                        Assert(m_sendBufferWritePtr > 0 && m_sendBufferNumMessages > 0);
                         m_peer.SendPacket(m_sendBufferWritePtr, m_remoteEndPoint, m_sendBufferNumMessages, out connectionReset);
                         m_statistics.PacketSent(m_sendBufferWritePtr, 1);
                         m_sendBufferWritePtr = 0;
@@ -262,14 +262,14 @@ namespace Lidgren.Network
                 for (int i = m_sendChannels.Length - 1; i >= 0; i--)    // Reverse order so reliable messages are sent first
                 {
                     var channel = m_sendChannels[i];
-                    NetException.Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
+                    Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
                     if (channel != null)
                     {
                         channel.SendQueuedMessages(now);
                         if (channel.NeedToSendMessages())
                             m_peer.m_needFlushSendQueue = true; // failed to send all queued sends; likely a full window - need to try again
                     }
-                    NetException.Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
+                    Assert(m_sendBufferWritePtr < 1 || m_sendBufferNumMessages > 0);
                 }
             }
 
@@ -279,7 +279,7 @@ namespace Lidgren.Network
             if (m_sendBufferWritePtr > 0)
             {
                 m_peer.VerifyNetworkThread();
-                NetException.Assert(m_sendBufferWritePtr > 0 && m_sendBufferNumMessages > 0);
+                Assert(m_sendBufferWritePtr > 0 && m_sendBufferNumMessages > 0);
                 m_peer.SendPacket(m_sendBufferWritePtr, m_remoteEndPoint, m_sendBufferNumMessages, out connectionReset);
                 m_statistics.PacketSent(m_sendBufferWritePtr, m_sendBufferNumMessages);
                 m_sendBufferWritePtr = 0;
@@ -526,7 +526,7 @@ namespace Lidgren.Network
             }
 
             int channelSlot = (int)tp - 1;
-            NetException.Assert(m_receiveChannels[channelSlot] == null);
+            Assert(m_receiveChannels[channelSlot] == null);
             m_receiveChannels[channelSlot] = chan;
 
             return chan;

@@ -76,7 +76,7 @@ namespace Lidgren.Network
 
         internal void ReleaseMessage(NetIncomingMessage msg)
         {
-            NetException.Assert(msg.m_incomingMessageType != NetIncomingMessageType.Error);
+            Assert(msg.m_incomingMessageType != NetIncomingMessageType.Error);
 
             if (msg.m_isFragment)
             {

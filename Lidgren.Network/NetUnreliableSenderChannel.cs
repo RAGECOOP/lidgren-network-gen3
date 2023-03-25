@@ -34,7 +34,7 @@
             if (!m_doFlowControl)
                 return int.MaxValue; // always allowed to send without flow control!
             int retval = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) % m_windowSize;
-            NetException.Assert(retval >= 0 && retval <= m_windowSize);
+            Assert(retval >= 0 && retval <= m_windowSize);
             return retval;
         }
 
@@ -118,7 +118,7 @@
                 //m_connection.m_peer.LogDebug("Received right-on-time ack for #" + seqNr);
 
                 // ack arrived right on time
-                NetException.Assert(seqNr == m_windowStart);
+                Assert(seqNr == m_windowStart);
 
                 m_receivedAcks[m_windowStart] = false;
                 m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;

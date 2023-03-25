@@ -89,6 +89,19 @@ namespace Lidgren.Network
             m_bitLength += 1;
         }
 
+#if UNSAFE
+        /// <summary>
+        /// Write an unmanaged POCO struct
+        /// </summary>
+        /// <param name="value"></param>
+        public unsafe void Write<T>(ref T value) where T : unmanaged
+        {
+            EnsureBufferSize(m_bitLength + sizeof(T));
+            NetBitWriter.WriteStruct(ref value, m_data, m_bitLength);
+            m_bitLength += sizeof(T) * 8;
+        }
+#endif
+
         /// <summary>
         /// Write a byte
         /// </summary>
@@ -126,7 +139,7 @@ namespace Lidgren.Network
         /// </summary>
         public void Write(byte source, int numberOfBits)
         {
-            NetException.Assert((numberOfBits > 0 && numberOfBits <= 8), "Write(byte, numberOfBits) can only write between 1 and 8 bits");
+            Assert((numberOfBits > 0 && numberOfBits <= 8), "Write(byte, numberOfBits) can only write between 1 and 8 bits");
             EnsureBufferSize(m_bitLength + numberOfBits);
             NetBitWriter.WriteByte(source, numberOfBits, m_data, m_bitLength);
             m_bitLength += numberOfBits;
@@ -150,6 +163,7 @@ namespace Lidgren.Network
             m_bitLength += bits;
         }
 
+#if UNSAFE
         [CLSCompliant(false)]
         public unsafe void Write(byte* source, int numberOfBytes)
         {
@@ -163,6 +177,7 @@ namespace Lidgren.Network
             }
             m_bitLength += bits;
         }
+#endif
 
         /// <summary>
         /// Writes an unsigned 16 bit integer
@@ -194,7 +209,7 @@ namespace Lidgren.Network
         [CLSCompliant(false)]
         public void Write(UInt16 source, int numberOfBits)
         {
-            NetException.Assert((numberOfBits > 0 && numberOfBits <= 16), "Write(ushort, numberOfBits) can only write between 1 and 16 bits");
+            Assert((numberOfBits > 0 && numberOfBits <= 16), "Write(ushort, numberOfBits) can only write between 1 and 16 bits");
             EnsureBufferSize(m_bitLength + numberOfBits);
             NetBitWriter.WriteUInt16(source, numberOfBits, m_data, m_bitLength);
             m_bitLength += numberOfBits;
@@ -244,15 +259,15 @@ namespace Lidgren.Network
             m_bitLength += 32;
         }
 #else
-		/// <summary>
-		/// Writes a 32 bit signed integer
-		/// </summary>
-		public void Write(Int32 source)
-		{
-			EnsureBufferSize(m_bitLength + 32);
-			NetBitWriter.WriteUInt32((UInt32)source, 32, m_data, m_bitLength);
-			m_bitLength += 32;
-		}
+        /// <summary>
+        /// Writes a 32 bit signed integer
+        /// </summary>
+        public void Write(Int32 source)
+        {
+            EnsureBufferSize(m_bitLength + 32);
+            NetBitWriter.WriteUInt32((UInt32)source, 32, m_data, m_bitLength);
+            m_bitLength += 32;
+        }
 #endif
 
         /// <summary>
@@ -291,16 +306,16 @@ namespace Lidgren.Network
             m_bitLength += 32;
         }
 #else
-		/// <summary>
-		/// Writes a 32 bit unsigned integer
-		/// </summary>
-		[CLSCompliant(false)]
-		public void Write(UInt32 source)
-		{
-			EnsureBufferSize(m_bitLength + 32);
-			NetBitWriter.WriteUInt32(source, 32, m_data, m_bitLength);
-			m_bitLength += 32;
-		}
+        /// <summary>
+        /// Writes a 32 bit unsigned integer
+        /// </summary>
+        [CLSCompliant(false)]
+        public void Write(UInt32 source)
+        {
+            EnsureBufferSize(m_bitLength + 32);
+            NetBitWriter.WriteUInt32(source, 32, m_data, m_bitLength);
+            m_bitLength += 32;
+        }
 #endif
 
         /// <summary>
@@ -321,7 +336,7 @@ namespace Lidgren.Network
         [CLSCompliant(false)]
         public void Write(UInt32 source, int numberOfBits)
         {
-            NetException.Assert((numberOfBits > 0 && numberOfBits <= 32), "Write(uint, numberOfBits) can only write between 1 and 32 bits");
+            Assert((numberOfBits > 0 && numberOfBits <= 32), "Write(uint, numberOfBits) can only write between 1 and 32 bits");
             EnsureBufferSize(m_bitLength + numberOfBits);
             NetBitWriter.WriteUInt32(source, numberOfBits, m_data, m_bitLength);
             m_bitLength += numberOfBits;
@@ -332,7 +347,7 @@ namespace Lidgren.Network
         /// </summary>
         public void Write(Int32 source, int numberOfBits)
         {
-            NetException.Assert((numberOfBits > 0 && numberOfBits <= 32), "Write(int, numberOfBits) can only write between 1 and 32 bits");
+            Assert((numberOfBits > 0 && numberOfBits <= 32), "Write(int, numberOfBits) can only write between 1 and 32 bits");
             EnsureBufferSize(m_bitLength + numberOfBits);
 
             if (numberOfBits != 32)
@@ -422,22 +437,22 @@ namespace Lidgren.Network
             Write(val);
         }
 #else
-		/// <summary>
-		/// Writes a 32 bit floating point value
-		/// </summary>
-		public void Write(float source)
-		{
-			// Use union to avoid BitConverter.GetBytes() which allocates memory on the heap
-			SingleUIntUnion su;
-			su.UIntValue = 0; // must initialize every member of the union to avoid warning
-			su.SingleValue = source;
+        /// <summary>
+        /// Writes a 32 bit floating point value
+        /// </summary>
+        public void Write(float source)
+        {
+            // Use union to avoid BitConverter.GetBytes() which allocates memory on the heap
+            SingleUIntUnion su;
+            su.UIntValue = 0; // must initialize every member of the union to avoid warning
+            su.SingleValue = source;
 
 #if BIGENDIAN
 			// swap byte order
 			su.UIntValue = NetUtility.SwapByteOrder(su.UIntValue);
 #endif
-			Write(su.UIntValue);
-		}
+            Write(su.UIntValue);
+        }
 #endif
 
 #if UNSAFE
@@ -453,12 +468,12 @@ namespace Lidgren.Network
             Write(val);
         }
 #else
-		/// <summary>
-		/// Writes a 64 bit floating point value
-		/// </summary>
-		public void Write(double source)
-		{
-			byte[] val = BitConverter.GetBytes(source);
+        /// <summary>
+        /// Writes a 64 bit floating point value
+        /// </summary>
+        public void Write(double source)
+        {
+            byte[] val = BitConverter.GetBytes(source);
 #if BIGENDIAN
 			// 0 1 2 3   4 5 6 7
 
@@ -479,8 +494,8 @@ namespace Lidgren.Network
 			val[4] = val[3];
 			val[3] = tmp;
 #endif
-			Write(val);
-		}
+            Write(val);
+        }
 #endif
 
         //
@@ -550,7 +565,7 @@ namespace Lidgren.Network
         /// </summary>
         public void WriteSignedSingle(float value, int numberOfBits)
         {
-            NetException.Assert(((value >= -1.0) && (value <= 1.0)), " WriteSignedSingle() must be passed a float in the range -1 to 1; val is " + value);
+            Assert(((value >= -1.0) && (value <= 1.0)), " WriteSignedSingle() must be passed a float in the range -1 to 1; val is " + value);
 
             float unit = (value + 1.0f) * 0.5f;
             int maxVal = (1 << numberOfBits) - 1;
@@ -564,7 +579,7 @@ namespace Lidgren.Network
         /// </summary>
         public void WriteUnitSingle(float value, int numberOfBits)
         {
-            NetException.Assert(((value >= 0.0) && (value <= 1.0)), " WriteUnitSingle() must be passed a float in the range 0 to 1; val is " + value);
+            Assert(((value >= 0.0) && (value <= 1.0)), " WriteUnitSingle() must be passed a float in the range 0 to 1; val is " + value);
 
             int maxValue = (1 << numberOfBits) - 1;
             uint writeVal = (uint)(value * (float)maxValue);
@@ -577,7 +592,7 @@ namespace Lidgren.Network
         /// </summary>
         public void WriteRangedSingle(float value, float min, float max, int numberOfBits)
         {
-            NetException.Assert(((value >= min) && (value <= max)), " WriteRangedSingle() must be passed a float in the range MIN to MAX; val is " + value);
+            Assert(((value >= min) && (value <= max)), " WriteRangedSingle() must be passed a float in the range MIN to MAX; val is " + value);
 
             float range = max - min;
             float unit = ((value - min) / range);
@@ -591,7 +606,7 @@ namespace Lidgren.Network
         /// </summary>
         public int WriteRangedInteger(int min, int max, int value)
         {
-            NetException.Assert(value >= min && value <= max, "Value not within min/max range!");
+            Assert(value >= min && value <= max, "Value not within min/max range!");
 
             uint range = (uint)(max - min);
             int numBits = NetUtility.BitsToHoldUInt(range);
@@ -608,7 +623,7 @@ namespace Lidgren.Network
         /// </summary>
         public int WriteRangedInteger(long min, long max, long value)
         {
-            NetException.Assert(value >= min && value <= max, "Value not within min/max range!");
+            Assert(value >= min && value <= max, "Value not within min/max range!");
 
             ulong range = (ulong)(max - min);
             int numBits = NetUtility.BitsToHoldUInt64(range);

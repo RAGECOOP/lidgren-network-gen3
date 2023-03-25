@@ -88,7 +88,7 @@ namespace Lidgren.Network
         public override void SetKey(byte[] data, int offset, int length)
         {
             var key = NetUtility.ComputeSHAHash(data, offset, length);
-            NetException.Assert(key.Length >= 16);
+            Assert(key.Length >= 16);
             SetKey(key, 0, 16);
         }
 

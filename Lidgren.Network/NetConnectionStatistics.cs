@@ -117,7 +117,7 @@ namespace Lidgren.Network
 #endif
         internal void PacketSent(int numBytes, int numMessages)
         {
-            NetException.Assert(numBytes > 0 && numMessages > 0);
+            Assert(numBytes > 0 && numMessages > 0);
             m_sentPackets++;
             m_sentBytes += numBytes;
             m_sentMessages += numMessages;
@@ -128,7 +128,7 @@ namespace Lidgren.Network
 #endif
         internal void PacketReceived(int numBytes, int numMessages, int numFragments)
         {
-            NetException.Assert(numBytes > 0 && numMessages > 0);
+            Assert(numBytes > 0 && numMessages > 0);
             m_receivedPackets++;
             m_receivedBytes += numBytes;
             m_receivedMessages += numMessages;

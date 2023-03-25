@@ -260,7 +260,7 @@ namespace Lidgren.Network
         internal void SendLibrary(NetOutgoingMessage msg, NetEndPoint recipient)
         {
             VerifyNetworkThread();
-            NetException.Assert(msg.m_isSent == false);
+            Assert(msg.m_isSent == false);
 
             bool connReset;
             int len = msg.Encode(m_sendBuffer, 0, 0);

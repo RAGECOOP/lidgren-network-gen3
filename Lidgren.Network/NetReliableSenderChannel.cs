@@ -42,7 +42,7 @@ namespace Lidgren.Network
         internal override int GetAllowedSends()
         {
             int retval = m_windowSize - ((m_sendStart + NetConstants.NumSequenceNumbers) - m_windowStart) % NetConstants.NumSequenceNumbers;
-            NetException.Assert(retval >= 0 && retval <= m_windowSize);
+            Assert(retval >= 0 && retval <= m_windowSize);
             return retval;
         }
 
@@ -120,7 +120,7 @@ namespace Lidgren.Network
                 if (m_queuedSends.TryDequeue(out om))
                     ExecuteSend(now, om);
                 num--;
-                NetException.Assert(num == GetAllowedSends());
+                Assert(num == GetAllowedSends());
             }
         }
 
@@ -136,7 +136,7 @@ namespace Lidgren.Network
             m_connection.QueueSendMessage(message, seqNr);
 
             int storeIndex = seqNr % m_windowSize;
-            NetException.Assert(m_storedMessages[storeIndex].Message == null);
+            Assert(m_storedMessages[storeIndex].Message == null);
 
             m_storedMessages[storeIndex].NumSent++;
             m_storedMessages[storeIndex].Message = message;
@@ -192,7 +192,7 @@ namespace Lidgren.Network
                 //m_connection.m_peer.LogDebug("Received right-on-time ack for #" + seqNr);
 
                 // ack arrived right on time
-                NetException.Assert(seqNr == m_windowStart);
+                Assert(seqNr == m_windowStart);
 
                 bool resetTimeout;
                 m_receivedAcks[m_windowStart] = false;
@@ -208,7 +208,7 @@ namespace Lidgren.Network
                     DestoreMessage(now, m_windowStart % m_windowSize, out rt);
                     resetTimeout |= rt;
 
-                    NetException.Assert(m_storedMessages[m_windowStart % m_windowSize].Message == null); // should already be destored
+                    Assert(m_storedMessages[m_windowStart % m_windowSize].Message == null); // should already be destored
                     m_windowStart = (m_windowStart + 1) % NetConstants.NumSequenceNumbers;
                     //m_connection.m_peer.LogDebug("Advancing window to #" + m_windowStart);
                 }
@@ -242,7 +242,7 @@ namespace Lidgren.Network
             else if (sendRelate > 0)
             {
                 // uh... we haven't sent this message yet? Weird, dupe or error...
-                NetException.Assert(false, "Got ack for message not yet sent?");
+                Assert(false, "Got ack for message not yet sent?");
                 return;
             }
 
@@ -261,7 +261,7 @@ namespace Lidgren.Network
                 else
                 {
                     int slot = rnr % m_windowSize;
-                    NetException.Assert(m_storedMessages[slot].Message != null);
+                    Assert(m_storedMessages[slot].Message != null);
                     if (m_storedMessages[slot].NumSent == 1)
                     {
                         // just sent once; resend immediately since we found gap in ack sequence

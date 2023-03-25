@@ -53,7 +53,7 @@ namespace Lidgren.Network
             m_messageType = NetMessageType.LibraryError;
             m_bitLength = 0;
             m_isSent = false;
-            NetException.Assert(m_recyclingCount == 0);
+            Assert(m_recyclingCount == 0);
             m_fragmentGroup = 0;
         }
 
@@ -107,7 +107,7 @@ namespace Lidgren.Network
                 }
             }
 
-            NetException.Assert(ptr > 0);
+            Assert(ptr > 0);
             return ptr;
         }
 

@@ -46,7 +46,7 @@
                 while (m_earlyReceived[nextSeqNr % m_windowSize])
                 {
                     message = m_withheldMessages[nextSeqNr % m_windowSize];
-                    NetException.Assert(message != null);
+                    Assert(message != null);
 
                     // remove it from withheld messages
                     m_withheldMessages[nextSeqNr % m_windowSize] = null;

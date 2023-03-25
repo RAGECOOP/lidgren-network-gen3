@@ -16,6 +16,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+global using static Lidgren.Network.NetException;
 using System;
 using System.Diagnostics;
 
@@ -51,10 +52,19 @@ namespace Lidgren.Network
         }
 
         /// <summary>
+        /// Throws an exception if first parameter is false
+        /// </summary>
+        public static void AssertAlways(bool isOk, string message = null)
+        {
+            if (!isOk)
+                throw new NetException(message);
+        }
+
+        /// <summary>
         /// Throws an exception, in DEBUG only, if first parameter is false
         /// </summary>
         [Conditional("DEBUG")]
-        public static void Assert(bool isOk, string message)
+        public static void Assert(bool isOk, string message = null)
         {
             if (!isOk)
                 throw new NetException(message);

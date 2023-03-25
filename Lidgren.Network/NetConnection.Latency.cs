@@ -96,7 +96,7 @@
             m_timeoutDeadline = now + m_peerConfiguration.m_connectionTimeout;
 
             double rtt = now - m_sentPingTime;
-            NetException.Assert(rtt >= 0);
+            Assert(rtt >= 0);
 
             double diff = (remoteSendTime + (rtt / 2.0)) - now;
 
