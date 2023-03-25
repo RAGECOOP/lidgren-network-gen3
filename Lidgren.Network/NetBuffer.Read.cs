@@ -41,24 +41,28 @@ namespace Lidgren.Network
 
 #if UNSAFE
         /// <summary>
-        /// Reads a POCO struct
+        /// Reads an unmanaged struct
         /// </summary>
-        public unsafe void ReadStruct<T>(out T outVal) where T : unmanaged
+        public unsafe void Read<T>(out T outVal) where T : unmanaged
         {
-            Assert((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
+            AssertAlways((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
             NetBitWriter.ReadStruct(out outVal, m_data, m_readPosition);
+            fixed (byte* pSrc = m_data)
+            {
+                var readByteOffset = m_readPosition >> 3;
+                NetBitWriter.ReadStruct(out outVal, pSrc + readByteOffset, m_readPosition - readByteOffset * 8);
+            }
             m_readPosition += sizeof(T) * 8;
         }
 
 
         /// <summary>
-        /// Reads a POCO struct
+        /// Reads an unmanaged struct
         /// </summary>
-        public unsafe void ReadStructVal<T>(out T outVal) where T : unmanaged
+        public unsafe T ReadVal<T>() where T : unmanaged
         {
-            Assert((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
-            NetBitWriter.ReadStruct(out outVal, m_data, m_readPosition);
-            m_readPosition += sizeof(T) * 8;
+            Read(out T retval);
+            return retval;
         }
 #endif
 

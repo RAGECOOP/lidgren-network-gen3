@@ -135,54 +135,51 @@ namespace UnitTests
             Assert(readTest.Name == "Hallon");
             Assert(readTest.Age == 8.2f);
 
-            var testStruct = new TestStruct()
+            var testStructs = new TestStruct[200];
+            for (int i = 0; i < 200; i++)
             {
-                Value1 = 12345,
-                Value2 = 123.456f
-            };
-
-
-            var testStruct2 = new TestStruct()
-            {
-                Value1 = 54321,
-                Value2 = 543.21f
-            };
+                testStructs[i] = new() { Value1 = i, Value2 = i * 1.655f };
+            }
 
             // test aligned WriteBytes/ReadBytes
             msg = peer.CreateMessage();
             byte[] testArr = new byte[] { 5, 6, 7, 8, 9 };
             msg.Write(testArr);
-            msg.Write(ref testStruct);
-            msg.Write(ref testStruct2);
+            for (int i = 0; i < 200; i++)
+            {
+                msg.Write(ref testStructs[i]);
+            }
 
             inc = Program.CreateIncomingMessage(msg.Data, msg.LengthBits);
             var arr = inc.ReadBytes(testArr.Length);
             Assert(arr.SequenceEqual(testArr));
-            inc.ReadStruct(out TestStruct outVal);
-            Assert(outVal.Value1 == testStruct.Value1);
-            Assert(outVal.Value2 == testStruct.Value2);
-            inc.ReadStruct(out outVal);
-            Assert(outVal.Value1 == testStruct2.Value1);
-            Assert(outVal.Value2 == testStruct2.Value2);
+            for (int i = 0; i < 200; i++)
+            {
+                inc.Read(out TestStruct outVal);
+                Assert(outVal.Value1 == testStructs[i].Value1);
+                Assert(outVal.Value2 == testStructs[i].Value2);
+            }
 
             // test unaligned WriteBytes/ReadBytes
             msg = peer.CreateMessage();
             msg.Write(true);
             msg.Write(testArr);
-            msg.Write(ref testStruct);
-            msg.Write(ref testStruct2);
+            for (int i = 0; i < 200; i++)
+            {
+                msg.Write(ref testStructs[i]);
+            }
 
             inc = Program.CreateIncomingMessage(msg.Data, msg.LengthBits);
             var b = inc.ReadBoolean();
             arr = inc.ReadBytes(testArr.Length);
             Assert(b);
             Assert(arr.SequenceEqual(testArr));
-            inc.ReadStruct(out outVal);
-            Assert(outVal.Value1 == testStruct.Value1);
-            Assert(outVal.Value2 == testStruct.Value2);
-            inc.ReadStruct(out outVal);
-            Assert(outVal.Value1 == testStruct2.Value1);
-            Assert(outVal.Value2 == testStruct2.Value2);
+            for (int i = 0; i < 200; i++)
+            {
+                inc.Read(out TestStruct outVal);
+                Assert(outVal.Value1 == testStructs[i].Value1);
+                Assert(outVal.Value2 == testStructs[i].Value2);
+            }
 
             Console.WriteLine("Read/write tests OK");
         }

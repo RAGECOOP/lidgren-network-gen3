@@ -91,13 +91,16 @@ namespace Lidgren.Network
 
 #if UNSAFE
         /// <summary>
-        /// Write an unmanaged POCO struct
+        /// Reads an unmanaged struct
         /// </summary>
-        /// <param name="value"></param>
         public unsafe void Write<T>(ref T value) where T : unmanaged
         {
             EnsureBufferSize(m_bitLength + sizeof(T) * 8);
-            NetBitWriter.WriteStruct(ref value, m_data, m_bitLength);
+            var destByteOffset = m_bitLength >> 3;
+            fixed (byte* pDest = &m_data[destByteOffset])
+            {
+                NetBitWriter.WriteStruct(ref value, pDest, m_bitLength - destByteOffset * 8);
+            }
             m_bitLength += sizeof(T) * 8;
         }
 #endif
