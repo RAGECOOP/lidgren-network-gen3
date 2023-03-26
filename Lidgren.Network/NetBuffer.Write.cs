@@ -103,6 +103,21 @@ namespace Lidgren.Network
             }
             m_bitLength += sizeof(T) * 8;
         }
+
+
+        /// <summary>
+        /// Writes an unmanaged struct
+        /// </summary>
+        public unsafe void Write<T>(T value) where T : unmanaged
+        {
+            EnsureBufferSize(m_bitLength + sizeof(T) * 8);
+            var destByteOffset = m_bitLength >> 3;
+            fixed (byte* pDest = &m_data[destByteOffset])
+            {
+                NetBitWriter.WriteStruct(ref value, pDest, m_bitLength - destByteOffset * 8);
+            }
+            m_bitLength += sizeof(T) * 8;
+        }
 #endif
 
         /// <summary>

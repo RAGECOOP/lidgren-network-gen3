@@ -46,7 +46,6 @@ namespace Lidgren.Network
         public unsafe void Read<T>(out T outVal) where T : unmanaged
         {
             AssertAlways((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
-            NetBitWriter.ReadStruct(out outVal, m_data, m_readPosition);
             fixed (byte* pSrc = m_data)
             {
                 var readByteOffset = m_readPosition >> 3;
@@ -59,10 +58,17 @@ namespace Lidgren.Network
         /// <summary>
         /// Reads an unmanaged struct
         /// </summary>
-        public unsafe T ReadVal<T>() where T : unmanaged
+        public unsafe T Read<T>() where T : unmanaged
         {
-            Read(out T retval);
-            return retval;
+            AssertAlways((m_bitLength - m_readPosition) >= sizeof(T) * 8, c_readOverflowError);
+            T value = default;
+            fixed (byte* pSrc = m_data)
+            {
+                var readByteOffset = m_readPosition >> 3;
+                value = NetBitWriter.ReadStruct<T>(pSrc + readByteOffset, m_readPosition - readByteOffset * 8);
+            }
+            m_readPosition += sizeof(T) * 8;
+            return value;
         }
 #endif
 

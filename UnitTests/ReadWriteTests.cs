@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using static Lidgren.Network.NetException;
 
@@ -149,6 +150,10 @@ namespace UnitTests
             {
                 msg.Write(ref testStructs[i]);
             }
+            for (int i = 0; i < 200; i++)
+            {
+                msg.Write(testStructs[i]);
+            }
 
             inc = Program.CreateIncomingMessage(msg.Data, msg.LengthBits);
             var arr = inc.ReadBytes(testArr.Length);
@@ -159,6 +164,12 @@ namespace UnitTests
                 Assert(outVal.Value1 == testStructs[i].Value1);
                 Assert(outVal.Value2 == testStructs[i].Value2);
             }
+            for (int i = 0; i < 200; i++)
+            {
+                var result=inc.Read<TestStruct>();
+                Assert(result.Value1 == testStructs[i].Value1);
+                Assert(result.Value2 == testStructs[i].Value2);
+            }
 
             // test unaligned WriteBytes/ReadBytes
             msg = peer.CreateMessage();
@@ -167,6 +178,10 @@ namespace UnitTests
             for (int i = 0; i < 200; i++)
             {
                 msg.Write(ref testStructs[i]);
+            }
+            for (int i = 0; i < 200; i++)
+            {
+                msg.Write(testStructs[i]);
             }
 
             inc = Program.CreateIncomingMessage(msg.Data, msg.LengthBits);
@@ -180,7 +195,12 @@ namespace UnitTests
                 Assert(outVal.Value1 == testStructs[i].Value1);
                 Assert(outVal.Value2 == testStructs[i].Value2);
             }
-
+            for (int i = 0; i < 200; i++)
+            {
+                var result = inc.Read<TestStruct>();
+                Assert(result.Value1 == testStructs[i].Value1);
+                Assert(result.Value2 == testStructs[i].Value2);
+            }
             Console.WriteLine("Read/write tests OK");
         }
     }

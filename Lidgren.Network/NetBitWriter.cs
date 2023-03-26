@@ -124,7 +124,7 @@ namespace Lidgren.Network
         }
 
         /// <summary>
-        /// Read a POCO struct from buffer
+        /// Read an unmanaged struct from buffer
         /// </summary>
         [CLSCompliant(false)]
         public static unsafe void ReadStruct<T>(out T value, byte* fromBuffer, int readBitOffset) where T : unmanaged
@@ -138,6 +138,26 @@ namespace Lidgren.Network
                 }
         }
 
+
+        /// <summary>
+        /// Read an unmanaged struct from buffer
+        /// </summary>
+        [CLSCompliant(false)]
+        public static unsafe T ReadStruct<T>(byte* fromBuffer, int readBitOffset) where T : unmanaged
+        {
+            T value = default;
+
+            if (readBitOffset == 0)
+                value = *(T*)fromBuffer;
+            else
+                ReadBytes(fromBuffer, sizeof(T), readBitOffset, (byte*)&value);
+
+            return value;
+        }
+
+        /// <summary>
+        /// Read an unmanaged struct from buffer
+        /// </summary>
         public static unsafe void ReadStruct<T>(out T value, byte[] fromBuffer, int readBitOffset) where T : unmanaged
         {
             fixed (byte* pSrc = fromBuffer)
@@ -298,6 +318,20 @@ namespace Lidgren.Network
                 else
                     WriteBytes((byte*)pVal, sizeof(T), dest, destBitOffset);
             }
+        }
+
+
+        /// <summary>
+        /// Write an unmanaged POCO struct into the buffer
+        /// </summary>
+        [CLSCompliant(false)]
+        public static unsafe void WriteStruct<T>(T value, byte* dest, int destBitOffset) where T : unmanaged
+        {
+            // Byte-aligned, just copy the whole struct
+            if (destBitOffset == 0)
+                *(T*)dest = value;
+            else
+                WriteBytes((byte*)&value, sizeof(T), dest, destBitOffset);
         }
 
 
