@@ -91,7 +91,7 @@ namespace Lidgren.Network
 
 #if UNSAFE
         /// <summary>
-        /// Reads an unmanaged struct
+        /// Writes an unmanaged struct
         /// </summary>
         public unsafe void Write<T>(ref T value) where T : unmanaged
         {
